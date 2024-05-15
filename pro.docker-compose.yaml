@@ -1,0 +1,208 @@
+version: "3.9"
+
+services:
+  posgresql:
+    image: timescale/timescaledb:2.0.0-pg12
+    container_name: postgres
+    restart: "always"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${Postgres_DB}
+      POSTGRES_USER: ${Postgres_USER}
+      POSTGRES_PASSWORD: ${Postgres_USER_PW}
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: "always"
+    ports:
+      - "6379:6379"
+      
+  django:
+    build:
+        context: ./hitl_ba_framework
+        dockerfile: ./Dockerfile
+    command: gunicorn hitl_ba_framework.asgi:application --workers 3 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:80
+    restart: "always"
+    container_name: django
+    stdin_open: true
+    tty: true
+    volumes:
+      - './hitl_ba_framework:/home/hitl_ba_framework'
+      - staticfiles:/home/hitl_ba_framework/static
+      - certs:/home/hitl_ba_framework/certs
+    depends_on:
+      - posgresql
+      - redis
+    links:
+      - posgresql
+      - redis
+    env_file:
+      - .env
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "false"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+
+  celery:
+    build: 
+        context: ./hitl_ba_framework
+        dockerfile: ./Dockerfile_Celery
+    command: celery -A hitl_ba_framework worker -l info
+    container_name: celery1
+    restart: "always"
+    volumes:
+      - './hitl_ba_framework:/home/hitl_ba_framework'
+      - staticfiles:/home/hitl_ba_framework/static
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "false"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+    depends_on:
+      - redis
+
+  celery-beat:
+    build:
+        context: ./hitl_ba_framework
+        dockerfile: ./Dockerfile_Celery
+    command: celery -A hitl_ba_framework beat -l info
+    container_name: celery_beat
+    restart: "always"
+    volumes:
+      - './hitl_ba_framework:/home/hitl_ba_framework'
+      - staticfiles:/home/hitl_ba_framework/static
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "false"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+    depends_on:
+      - redis
+
+  mqtt_agent:
+    build: ./mqtt_client
+    command: python mqtt_client.py
+    container_name: mqtt_agent
+    restart: "always"
+    stdin_open: true
+    tty: true
+    volumes:
+      - './mqtt_client:/home/mqtt_client'
+    depends_on:
+      - django
+      - redis
+    links:
+      - django
+      - redis
+
+  mqtt_broker:
+    image: eclipse-mosquitto:latest
+    restart: "always"
+    container_name: mosquitto
+    hostname: mosquitto  
+    expose:
+      - "1883"
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt_broker/config:/mosquitto/config
+      - ./mqtt_broker/data:/mosquitto/data
+      - ./mqtt_broker/log:/mosquitto/log
+    links:
+      - mqtt_agent
+
+
+  weather_agent:
+    build: ./dwd
+    command: python core.py
+    container_name: dwd
+    restart: "always"
+    stdin_open: true
+    tty: true
+    volumes:
+      - './dwd:/home/dwd'
+    depends_on:
+      - django
+      - redis
+    links:
+      - django
+      - redis
+
+  nginx: 
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+    restart: "always"
+    container_name: nginx
+    volumes:
+      - staticfiles:/home/hitl_ba_framework/static
+      - certs:/home/hitl_ba_framework/certs
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - django
+    links:
+      - django
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: "always"
+    depends_on:
+      - posgresql
+    ports:
+      - "8000:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    depends_on:
+      - posgresql
+    links:
+      - posgresql
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SERVER_ROOT_URL: '%(protocol)s://%(domain)s:%(http_port)s/grafana/'
+  
+volumes:
+  postgres_data:
+  staticfiles:
+  certs:
+  grafana_data:
