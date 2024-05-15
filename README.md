@@ -1,5 +1,5 @@
 
-<a href="https://www.ebc.eonerc.rwth-aachen.de/"> <img src="logos/ebc-rwth-Logo.png" alt="EBC" title="EBC" align="right" width="550"/> </a>
+<a href="https://www.ebc.eonerc.rwth-aachen.de/"> <img src="logos/ebc-rwth-Logo.png" alt="EBC" title="EBC" align="right" width="400"/> </a>
 
 <br/><br/>
 
