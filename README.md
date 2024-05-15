@@ -32,7 +32,7 @@
 
 This project is licensed under the [MIT][license-M] License.
 
-<a href="https://www.bmwk.de/Navigation/DE/Home/home.html"> <img alt="Funding Source 1" src="logos/BMWK_Fz_2017_Office_Farbe_en.png" height="700"> </a>
+<a href="https://www.bmwk.de/Navigation/DE/Home/home.html"> <img alt="Funding Source 1" src="logos/BMWK_Fz_2017_Office_Farbe_en.png" height="500"> </a>
 
 [license-image-M]: https://img.shields.io/badge/license-MIT-blue
 [license-M]: http://doge.mit-license.org
