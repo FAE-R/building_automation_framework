@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  posgresql:
+    image: timescale/timescaledb:2.0.0-pg12
+    container_name: postgres
+    restart: "always"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${Postgres_DB}
+      POSTGRES_USER: ${Postgres_USER}
+      POSTGRES_PASSWORD: ${Postgres_USER_PW}
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: "always"
+    ports:
+      - "6379:6379"
+
+  django:
+    build:
+      context: ./hitl_ba_framework
+      dockerfile: ./Dockerfile
+    command: uvicorn hitl_ba_framework.asgi:application --host 0.0.0.0 --port 80 --reload
+    restart: "always"
+    container_name: django
+    stdin_open: true
+    tty: true
+    volumes:
+      - "./hitl_ba_framework:/home/hitl_ba_framework"
+      - staticfiles:/home/hitl_ba_framework/static
+    depends_on:
+      - posgresql
+      - redis
+    links:
+      - posgresql
+      - redis
+    env_file:
+      - .env
+    ports:
+      - 80:80
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "true"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+
+volumes:
+  postgres_data:
+  staticfiles:

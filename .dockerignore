@@ -1,0 +1,11 @@
+# comment
+*/temp*
+*/*/temp*
+
+**/.vscode
+**/.vs
+**/.dockerignore
+**/Dockerfile*
+**/.git
+**/.gitignore
+**/.md

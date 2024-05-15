@@ -1,0 +1,4 @@
+channels==4.0.0
+channels-redis==4.0.0
+asgiref==3.6.0
+wetterdienst==0.55.0
