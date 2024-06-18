@@ -1,4 +1,4 @@
-ASGI_APPLICATION = 'hitl_ba_framework.routing.application'
+ASGI_APPLICATION = 'ba_framework.routing.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',

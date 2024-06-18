@@ -23,17 +23,17 @@ services:
       
   django:
     build:
-        context: ./hitl_ba_framework
+        context: ./ba_framework
         dockerfile: ./Dockerfile
-    command: gunicorn hitl_ba_framework.asgi:application --workers 3 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:80
+    command: gunicorn ba_framework.asgi:application --workers 3 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:80
     restart: "always"
     container_name: django
     stdin_open: true
     tty: true
     volumes:
-      - './hitl_ba_framework:/home/hitl_ba_framework'
-      - staticfiles:/home/hitl_ba_framework/static
-      - certs:/home/hitl_ba_framework/certs
+      - './ba_framework:/home/ba_framework'
+      - staticfiles:/home/ba_framework/static
+      - certs:/home/ba_framework/certs
     depends_on:
       - posgresql
       - redis
@@ -58,14 +58,14 @@ services:
 
   celery:
     build: 
-        context: ./hitl_ba_framework
+        context: ./ba_framework
         dockerfile: ./Dockerfile_Celery
-    command: celery -A hitl_ba_framework worker -l info
+    command: celery -A ba_framework worker -l info
     container_name: celery1
     restart: "always"
     volumes:
-      - './hitl_ba_framework:/home/hitl_ba_framework'
-      - staticfiles:/home/hitl_ba_framework/static
+      - './ba_framework:/home/ba_framework'
+      - staticfiles:/home/ba_framework/static
     environment:
       WAIT_HOSTS: posgresql:${Postgres_PORT}
       Postgres_DATABASE: ${Postgres_DB}
@@ -84,14 +84,14 @@ services:
 
   celery-beat:
     build:
-        context: ./hitl_ba_framework
+        context: ./ba_framework
         dockerfile: ./Dockerfile_Celery
-    command: celery -A hitl_ba_framework beat -l info
+    command: celery -A ba_framework beat -l info
     container_name: celery_beat
     restart: "always"
     volumes:
-      - './hitl_ba_framework:/home/hitl_ba_framework'
-      - staticfiles:/home/hitl_ba_framework/static
+      - './ba_framework:/home/ba_framework'
+      - staticfiles:/home/ba_framework/static
     environment:
       WAIT_HOSTS: posgresql:${Postgres_PORT}
       Postgres_DATABASE: ${Postgres_DB}
@@ -124,39 +124,6 @@ services:
       - django
       - redis
 
-  mqtt_broker:
-    image: eclipse-mosquitto:latest
-    restart: "always"
-    container_name: mosquitto
-    hostname: mosquitto  
-    expose:
-      - "1883"
-    ports:
-      - "1883:1883"
-    volumes:
-      - ./mqtt_broker/config:/mosquitto/config
-      - ./mqtt_broker/data:/mosquitto/data
-      - ./mqtt_broker/log:/mosquitto/log
-    links:
-      - mqtt_agent
-
-
-  weather_agent:
-    build: ./dwd
-    command: python core.py
-    container_name: dwd
-    restart: "always"
-    stdin_open: true
-    tty: true
-    volumes:
-      - './dwd:/home/dwd'
-    depends_on:
-      - django
-      - redis
-    links:
-      - django
-      - redis
-
   nginx: 
     build:
       context: ./nginx
@@ -164,8 +131,8 @@ services:
     restart: "always"
     container_name: nginx
     volumes:
-      - staticfiles:/home/hitl_ba_framework/static
-      - certs:/home/hitl_ba_framework/certs
+      - staticfiles:/home/ba_framework/static
+      - certs:/home/ba_framework/certs
     ports:
       - 80:80
       - 443:443
