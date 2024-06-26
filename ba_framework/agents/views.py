@@ -16,6 +16,3 @@ from agents.tasks import my_new_task
 def index(request):
     return render(request, "agents/index.html")
 
-
-
-#
