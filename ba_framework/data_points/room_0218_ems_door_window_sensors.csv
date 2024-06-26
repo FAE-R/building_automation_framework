@@ -1,0 +1,15 @@
+device_name;device_id;table_id;topic;data_point_name;data_point_type;measurement_type;description
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_accMotion;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_accMotion;float;m/s2;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_digital;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_digital;float;binary;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_pulseAbs;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_pulseAbs;float;digit;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_vdd;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_vdd;float;v;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_x;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_x;float;grad;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_y;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_y;float;grad;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe05f44b;elsysEMS_0218_1_z;v3/ebc-ig@ttn/devices/eui-a81758fffe05f44b/up;eui-a81758fffe05f44b_z;float;grad;EMS_0218_1
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_accMotion;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_accMotion;float;m/s2;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_digital;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_digital;float;binary;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_pulseAbs;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_pulseAbs;float;digit;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_vdd;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_vdd;float;v;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_x;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_x;float;grad;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_y;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_y;float;grad;EMS_0218_2
+tab-elsys-ers;eui-a81758fffe097e85;elsysEMS_0218_2_z;v3/ebc-ig@ttn/devices/eui-a81758fffe097e85/up;eui-a81758fffe097e85_z;float;grad;EMS_0218_2

@@ -7,9 +7,9 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 ### read csv data and save in pickle ####
 
-# df = pd.read_csv(path + "/elsysCO2_dp_list_berlin.csv", sep=';')
+# df = pd.read_csv(path + "/room_0218_eye_sensors.csv", sep=';')
 # print(df)
-# df.to_pickle(path + "/elsysCO2_dp_list_berlin.pkl")
+# df.to_pickle(path + "/room_0218_eye_sensors.pkl")
 
 
 # see all pickle files ##
@@ -25,10 +25,10 @@ for filename in all_files:
 
 result = pd.concat(data_point_lists, ignore_index=True)
 
-# print(result)
-# result = result.drop_duplicates(subset=['table_id'])
-# print(result[result.duplicated(subset=['data_point_name'])])
+print(result)
+result = result.drop_duplicates(subset=['table_id'])
+print(result[result.duplicated(subset=['data_point_name'])])
 
 print(result[result.duplicated(subset=['table_id'])])
-# result = result.drop_duplicates(subset=['data_point_name'])
-# print(result)
+result = result.drop_duplicates(subset=['data_point_name'])
+print(result)
