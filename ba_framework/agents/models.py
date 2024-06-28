@@ -1,36 +1,14 @@
-# Importing the models module from Django, which provides the base classes for defining database models.
 from django.db import models
-
-# Importing the User model from Django's built-in authentication system to handle user-related data.
 from django.contrib.auth.models import User
-
-# Importing the post_save and pre_save signals from Django's models module, which are triggered after or before saving a model instance, respectively.
 from django.db.models.signals import post_save, pre_save
-
-# Importing the receiver decorator from Django's dispatch module to connect signal handlers to signals.
 from django.dispatch import receiver
-
-# Importing validators from Django's core validators to enforce constraints on model fields.
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-# Importing ObjectDoesNotExist exception from Django's core exceptions to handle cases where an object does not exist.
 from django.core.exceptions import ObjectDoesNotExist
-
-# Importing utilities from Django's timezone module to work with time zones and date/time fields.
 from django.utils import timezone
-
-# Importing timedelta from Python's datetime module to perform date/time manipulations.
 from datetime import timedelta
-
-# Importing pytz to handle different time zones.
 import pytz
-
-# Importing os to interact with the operating system, such as file and directory management.
 import os
-
-# Importing apps from Django to work with Django applications.
 from django.apps import apps
-
 # Importing SearchVector from Django's PostgreSQL full-text search support to enable full-text search capabilities.
 from django.contrib.postgres.search import SearchVector
 
@@ -41,6 +19,27 @@ class Building(models.Model):
 
     def __str__(self):
         return self.name + " -- " + self.location
+    
+# class Vicki_Thermostat(models.Model):
+#     room = models.ForeignKey(Room, on_delete=models.CASCADE)
+#     serial_number = models.CharField(max_length=100, null=True, blank=True)
+#     device_id_ttn = models.CharField(max_length=100, null=True, blank=True)
+#     ttn_webook_id = models.CharField(max_length=100, null=True, blank=True)
+#     ttn_app_id = models.CharField(max_length=100, null=True, blank=True)
+#     ttn_token = models.CharField(max_length=100, null=True, blank=True)
+#     ttn_m_token = models.CharField(max_length=100, null=True, blank=True)
+#     target_temperature = models.CharField(max_length=100, null=True, blank=True)
+#     operational_mode = models.CharField(max_length=100, null=True, blank=True)
+#     motor_position = models.CharField(max_length=100, null=True, blank=True)
+#     downlink_motor_position = models.CharField(max_length=100, null=True, blank=True)
+#     motor_range = models.CharField(max_length=100, null=True, blank=True)
+#     internal_sensor_temperatur = models.CharField(max_length=100, null=True, blank=True)
+#     battery_voltage = models.CharField(max_length=100, null=True, blank=True)
+
+#     def __str__(self):
+#         return self.room.name + " -- " + self.serial_number
+
+
 
 
 class Profile(models.Model):
@@ -69,24 +68,24 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance, username=instance.username)
 
 
-# # Signal receiver to save the Profile whenever the User is saved.
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     # This function is called whenever a User instance is saved.
-#     # It tries to save the associated Profile instance.
-#     # If the Profile instance does not exist (ObjectDoesNotExist),
-#     # it creates a new Profile instance linked to this User.
-#     try:
-#         instance.profile.save()
-#     except ObjectDoesNotExist:
-#         Profile.objects.create(user=instance, username=instance.username)
-
+# Signal receiver to save the Profile whenever the User is saved.
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def save_user_profile(sender, instance, **kwargs):
+    # This function is called whenever a User instance is saved.
+    # It tries to save the associated Profile instance.
+    # If the Profile instance does not exist (ObjectDoesNotExist),
+    # it creates a new Profile instance linked to this User.
     try:
         instance.profile.save()
     except ObjectDoesNotExist:
         Profile.objects.create(user=instance, username=instance.username)
+
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     try:
+#         instance.profile.save()
+#     except ObjectDoesNotExist:
+#         Profile.objects.create(user=instance, username=instance.username)
 
 
 class Room(models.Model):
@@ -113,3 +112,25 @@ class Room(models.Model):
     def __str__(self):
         return self.name + " -- " + self.building.name
 
+class Sensor(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    device_name = models.CharField(max_length=100)
+    device_id = models.CharField(max_length=100, unique=True)  # Assuming device ID should be unique
+    table_id = models.CharField(max_length=100)
+    topic = models.CharField(max_length=100)
+    data_point_name = models.CharField(max_length=100)
+    data_point_type = models.CharField(max_length=100)
+    measurement_type = models.CharField(max_length=100)
+    description = models.TextField()  # Use TextField if descriptions can be long
+
+    def __str__(self):
+        return f"{self.device_name} ({self.device_id})"
+    
+class Room_Monitoring_Sensors(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
+    value = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sensor.device_name} ({self.sensor.device_id}) - {self.value} ({self.timestamp})"

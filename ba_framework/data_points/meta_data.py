@@ -1,7 +1,6 @@
 import pandas as pd
 import redis
 from logger.models import MetaData
-from agents.models import Vicki_Thermostat
 import glob
 import os
 import json

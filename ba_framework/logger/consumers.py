@@ -1,19 +1,8 @@
-# Importing datetime module for handling date and time.
 from datetime import datetime
-
-# Importing timezone utilities from Django to work with time zones.
 from django.utils import timezone
-
-# Importing AsyncConsumer from channels.consumer to create an asynchronous consumer.
 from channels.consumer import AsyncConsumer
-
-# Importing database_sync_to_async from channels.db to run synchronous database code in an asynchronous context.
 from channels.db import database_sync_to_async
-
-# Importing apps from Django to dynamically load models.
 from django.apps import apps
-
-# Importing pytz to handle different time zones.
 import pytz
 
 # Importing send_mail from Django's core mail module for sending emails.
