@@ -15,12 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from docspage import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('logger.urls')),
     path('api/', include('rest_api.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('docspage/', views.home, name='home'),  # Add this line
 ]
