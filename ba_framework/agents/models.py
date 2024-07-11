@@ -1,41 +1,53 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from datetime import timedelta
-import pytz
-import os
+import uuid
+import json
+import redis
 from django.apps import apps
+from django.core.management import call_command
+
+
 # Importing SearchVector from Django's PostgreSQL full-text search support to enable full-text search capabilities.
 from django.contrib.postgres.search import SearchVector
 
+redis_instance = redis.StrictRedis(
+    host="redis", port=6379, db=0, charset="utf-8", decode_responses=True)
 
-class Building(models.Model):
-    name = models.CharField(max_length=30, default="UNKNOWN", null=True,)
-    location = models.CharField(max_length=30, blank=True, null=True,)
-
-    def __str__(self):
-        return self.name + " -- " + self.location
-    
 
 class Profile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, primary_key=True)
     username = models.CharField(max_length=30, default="UNKNOWN")
-    building = models.ForeignKey(
-        Building, on_delete=models.CASCADE, null=True)
     join_date = models.DateField(null=True, blank=True)
-    push_notification_token = models.CharField(max_length=150, blank=True)
-    geofencing_active = models.BooleanField(default=False)
-    notification_active = models.BooleanField(default=False)
+    role = models.CharField(max_length=30, default="UNKNOWN")
+    email = models.EmailField(null=True, blank=True,)
     description = models.TextField(max_length=500, blank=True)
 
     def __str__(self):
         return self.username
 
+
+class Building(models.Model):
+    name = models.CharField(max_length=30, default="UNKNOWN", null=True,)
+    building_id = models.CharField(max_length=30, blank=True, null=True,)
+    operator =  models.ForeignKey(
+        Profile, on_delete=models.CASCADE, null=True)
+    owner =  models.ForeignKey(
+        Profile, on_delete=models.CASCADE, null=True)
+    location = models.CharField(max_length=30, blank=True, null=True,)
+    address = models.CharField(max_length=30, blank=True, null=True,)
+    city = models.CharField(max_length=30, blank=True, null=True,)
+    country = models.CharField(max_length=30, blank=True, null=True,)
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    description = models.TextField(max_length=500, blank=True)
+
+    def __str__(self):
+        return self.name + " -- " + self.location
 
 # Signal receiver to create a Profile whenever a new User is created.
 @receiver(post_save, sender=User)
@@ -47,7 +59,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance, username=instance.username)
 
 
-# Signal receiver to save the Profile whenever the User is saved.
+# Signal receiver to change the Profile whenever the User is saved.
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     # This function is called whenever a User instance is saved.
@@ -87,3 +99,136 @@ class Room(models.Model):
         return self.name + " -- " + self.building.name
     
 
+
+SENSOR_CHOICES = [
+    ("smart_thermostat_vicki", "smart_thermostat_vicki"),
+    ("elsys-ers-co2", "elsys-ers-co2"),
+    ("tab-elsys-ers", "tab-elsys-ers"),
+    ("elsys-ers-eye", "elsys-ers-eye")
+]
+
+
+class Device(models.Model):
+    room = models.ForeignKey(
+        to=Room, on_delete=models.CASCADE, null=True, blank=True)
+    device_id = models.CharField(max_length=30, blank=False, null=False)
+    device_appEui = models.CharField(max_length=30, blank=True, null=True)
+    device_devEui = models.CharField(max_length=30, blank=True, null=True)
+    device_name = models.CharField(max_length=30, blank=True, null=True)
+    app_id = models.CharField(max_length=30, blank=True, null=True)
+    type = models.CharField(max_length=30, choices=SENSOR_CHOICES, blank=False, null=False,
+                            help_text="device type (e.g. sensor, actuator, switch,…)")
+    status = models.CharField(max_length=30, blank=True, null=True,
+                              help_text="device status (e.g. online, offline, idle)")
+    manufacturer = models.CharField(max_length=30, blank=True, null=True)
+    topic = models.CharField(max_length=30, blank=True, null=True)
+    firmware_version = models.CharField(max_length=30, blank=True, null=True)
+    pub_date = models.DateField(blank=True, null=True)
+    mod_date = models.DateField(auto_now=True)
+    description = models.TextField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.device_id)
+
+class Datapoint(models.Model):
+    datapoint_name = models.CharField(max_length=30, blank=False, null=False)
+    table_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    device_eui = models.CharField(max_length=30, blank=False, null=False)
+    device = models.ForeignKey(
+        to=Device, on_delete=models.CASCADE, null=False)
+    type = models.CharField(max_length=30, default="float")
+    status = models.CharField(max_length=30, blank=True, null=True,
+                              help_text="datapoint status (e.g. online, offline, idle)")
+    measurement_type = models.CharField(max_length=30, blank=True, null=True)
+    pub_date = models.DateField(blank=True, null=True)
+    mod_date = models.DateField(auto_now=True)
+    description = models.TextField(max_length=200, blank=True, null=True)
+
+
+    def __str__(self):
+        return str(self.device.type) + " -- " + str(self.datapoint_name)
+
+
+
+@receiver(post_save, sender=Device)
+def create_datapoints(sender, instance, created, **kwargs):
+    if created:
+        try:
+            if instance.type == "smart_thermostat_vicki":
+                data_point_list = ["batteryVoltage", "childLock", "motorPosition", "motorRange", "sensorTemperature", "targetTemperature", "operationalMode", "manualTargetTemperatureUpdate", "downlinkMotorPosition", "keepAliveTime"]
+            elif instance.type == "elsys-ers-co2":
+                data_point_list = ["temperature", "humidity",
+                                   "co2", "light", "motion", "vdd"]
+            elif instance.type == "tab-elsys-ers":
+                data_point_list = ["accMotion", "digital", "pulseAbs", "vdd", "x", "y", "z"]
+            elif instance.type == "elsys-ers-eye":
+                data_point_list = ["occupancy", "humidity", "light", "motion", "temperature", "vdd"]
+            else:
+                print("device not found in sensor list!")
+                pass
+
+            if instance.device_id is not None:
+                for dp in data_point_list:
+                    dp_obj = Datapoint.objects.create(
+                        datapoint_name=instance.device_devEui + '_' + dp, 
+                        device=instance, 
+                        device_eui=instance.device_devEui, 
+                        type=dp
+                    )
+
+                    value = {
+                        "data_point_name": instance.device_devEui + '_' + dp,
+                        "device_name": instance.device_name,
+                        "device_id": instance.device_devEui,
+                        "table_id": dp_obj.table_id,
+                        "topic": "v3/"+instance.app_id+"@ttn/devices/#",  
+                        "data_point_type": "float",
+                        "measurement_type": "float",
+                        "description": "this is a ..."
+                    }
+
+                    value = json.dumps(value)
+                    
+                    key = value["data_point_name"] # add data point name
+                    redis_instance.set(key, value)
+                    response = {
+                        'msg': f"{key} successfully set to {instance.device_DevEui}"
+                    }
+                    print("Redis: ", response)
+
+                call_command('makemigrations', 'logger', interactive=False)
+                call_command('migrate', interactive=False)
+
+
+        except ObjectDoesNotExist:
+            print(
+                f"Error while creating datapoints for device {instance}".format(instance))
+
+    else:
+
+        if instance.device_id is not None:
+            dps = Datapoint.objects.filter(
+                    device=instance
+                )
+            for dp in dps:
+
+                value = {
+                    "data_point_name": instance.device_devEui + '_' + dp.type,
+                    "data_point": dp.type,
+                    "device_name": instance.device_name,
+                    "device_id": instance.device_devEui,
+                    "table_id": dp.table_id,
+                    "topic": "v3/"+instance.app_id+"@ttn/devices/#",  
+                    "data_point_type": "float",
+                    "measurement_type": "float",
+                    "description": "this is a ..."
+                }
+
+                value = json.dumps(value)
+                
+                key = value["data_point_name"] # add data point name
+                redis_instance.set(key, value)
+                response = {
+                    'msg': f"{key} successfully set to {instance.device_DevEui}"
+                }
+                print("Redis: ", response)

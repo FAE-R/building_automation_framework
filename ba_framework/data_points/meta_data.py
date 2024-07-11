@@ -1,8 +1,5 @@
-import pandas as pd
 import redis
-from logger.models import MetaData
-import glob
-import os
+from agents.models import Datapoint
 import json
 
 
@@ -11,64 +8,42 @@ def MetaData_fill():
     redis_instance = redis.StrictRedis(
         host="redis", port=6379, db=0, charset="utf-8", decode_responses=True)
 
-    all_files = glob.glob(os.path.join("./data_points/", "*.pkl"))
+    ####### get data from database (postgresql) #####
 
-    data_point_lists = []
+    DPs = Datapoint.objects.all()
 
-    for filename in all_files:
-        data_frame = pd.read_pickle(filename)
-        data_point_lists.append(data_frame)
+    ####### save data point name as a dict in redis #####
 
-    df = pd.concat(data_point_lists, ignore_index=True)
+    for dp in range(DPs):
 
-    length, columnes = df.shape
-
-    for i in range(length):
-
-        ####### save data point name as a dict in redis #####
-
-        key = df.data_point_name[i]
 
         value = {
-            "device_name": df.device_name[i],
-            "device_id": df.device_id[i],
-            "table_id": df.table_id[i],
-            "topic": df.topic[i],
-            "data_point_type": df.data_point_type[i],
-            "measurement_type": df.measurement_type[i],
-            "description": df.description[i]
+            "data_point_name": dp.device.device_devEui + '_' + dp.type,
+            "data_point": dp.type,
+            "device_name": dp.device.device_name,
+            "device_id": dp.device.device_devEui,
+            "table_id": dp.table_id,
+            "topic": "v3/"+ dp.device.app_id+"@ttn/devices/#",  
+            "data_point_type": "float",
+            "measurement_type": "float",
+            "description": "this is a ..."
         }
-
         value = json.dumps(value)
-
+        
+        key = value["data_point_name"] # add data point name
         redis_instance.set(key, value)
         response = {
-            'msg': f"{key} successfully set to {df.table_id[i]}"
+            'msg': f"{key} successfully set to {dp.device.device_DevEui}"
         }
         print("Redis: ", response)
 
         ####### save device id as a dict in redis #####
 
-        key = df.device_id[i]
+        key = dp.device_id
 
-        redis_instance.set(key, df.device_name[i])
+        redis_instance.set(key, dp.device_name)
 
-        ####### save meta data in the database (postgresql) #####
-
-        p, created = MetaData.objects.get_or_create(
-            device_name=df.device_name[i],
-            device_id=df.device_id[i],
-            table_id=df.table_id[i],
-            topic=df.topic[i],
-            data_point_name=df.data_point_name[i],
-            data_point_type=df.data_point_type[i],
-            measurement_type=df.measurement_type[i],
-            description=df.description[i]
-        )
-
-        if created:
-            print(df.table_id[i],
-                  ": table MetaData filled with a new entry ...")
+        print(dp.table_id, ": table MetaData filled with a new entry ...")
             
 
     print("Meta data tables ready ...")
