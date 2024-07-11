@@ -41,8 +41,6 @@ services:
       - redis
     env_file:
       - .env
-    ports:
-      - 80:80
     environment:
       WAIT_HOSTS: posgresql:${Postgres_PORT}
       Postgres_DATABASE: ${Postgres_DB}
@@ -56,6 +54,22 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: "true"
       EXPO_TOKEN: ${EXPO_TOKEN}
+
+  nginx: 
+    build:
+      context: ./nginx/dev
+      dockerfile: ./dev.Dockerfile
+    restart: "always"
+    container_name: nginx
+    volumes:
+      - staticfiles:/home/ba_framework/static
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - django
+    links:
+      - django
 
 volumes:
   postgres_data:

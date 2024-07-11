@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from logger.models import *
 from django.contrib.auth.models import User
-from agents.models import Profile, Room, Room_Users, Comfort_Feedback, Building, Scheduler, Room_Monitoring_Datapoints, Notification
+from agents.models import Profile, Room, Building
 from django_celery_results.models import TaskResult
 
 class UserSerializer(serializers.ModelSerializer):

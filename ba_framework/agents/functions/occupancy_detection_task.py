@@ -1,4 +1,4 @@
-from agents.models import Room_Monitoring_Datapoints, Scheduler
+from agents.models import Room_Monitoring_Sensors, Scheduler
 from logger.models import *
 from django.apps import apps
 from django.utils import timezone
@@ -68,7 +68,7 @@ def Occupancy_Detection(room: object, current_state: int) -> dict:
             output["last_occupancy"] = -1
             print("Room occupancy unkown")
 
-        table_list = Room_Monitoring_Datapoints.objects.get(room=room)
+        table_list = Room_Monitoring_Sensors.objects.get(room=room)
 
         ranges = (timezone.now() - timedelta(minutes=15), timezone.now())
         ranges_door = (timezone.now() - timedelta(minutes=20), timezone.now())

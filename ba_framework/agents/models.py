@@ -1,36 +1,14 @@
-# Importing the models module from Django, which provides the base classes for defining database models.
 from django.db import models
-
-# Importing the User model from Django's built-in authentication system to handle user-related data.
 from django.contrib.auth.models import User
-
-# Importing the post_save and pre_save signals from Django's models module, which are triggered after or before saving a model instance, respectively.
 from django.db.models.signals import post_save, pre_save
-
-# Importing the receiver decorator from Django's dispatch module to connect signal handlers to signals.
 from django.dispatch import receiver
-
-# Importing validators from Django's core validators to enforce constraints on model fields.
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-# Importing ObjectDoesNotExist exception from Django's core exceptions to handle cases where an object does not exist.
 from django.core.exceptions import ObjectDoesNotExist
-
-# Importing utilities from Django's timezone module to work with time zones and date/time fields.
 from django.utils import timezone
-
-# Importing timedelta from Python's datetime module to perform date/time manipulations.
 from datetime import timedelta
-
-# Importing pytz to handle different time zones.
 import pytz
-
-# Importing os to interact with the operating system, such as file and directory management.
 import os
-
-# Importing apps from Django to work with Django applications.
 from django.apps import apps
-
 # Importing SearchVector from Django's PostgreSQL full-text search support to enable full-text search capabilities.
 from django.contrib.postgres.search import SearchVector
 
@@ -41,7 +19,7 @@ class Building(models.Model):
 
     def __str__(self):
         return self.name + " -- " + self.location
-
+    
 
 class Profile(models.Model):
     user = models.OneToOneField(
@@ -69,24 +47,19 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance, username=instance.username)
 
 
-# # Signal receiver to save the Profile whenever the User is saved.
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     # This function is called whenever a User instance is saved.
-#     # It tries to save the associated Profile instance.
-#     # If the Profile instance does not exist (ObjectDoesNotExist),
-#     # it creates a new Profile instance linked to this User.
-#     try:
-#         instance.profile.save()
-#     except ObjectDoesNotExist:
-#         Profile.objects.create(user=instance, username=instance.username)
-
+# Signal receiver to save the Profile whenever the User is saved.
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def save_user_profile(sender, instance, **kwargs):
+    # This function is called whenever a User instance is saved.
+    # It tries to save the associated Profile instance.
+    # If the Profile instance does not exist (ObjectDoesNotExist),
+    # it creates a new Profile instance linked to this User.
     try:
         instance.profile.save()
     except ObjectDoesNotExist:
         Profile.objects.create(user=instance, username=instance.username)
+
+
 
 
 class Room(models.Model):
@@ -112,4 +85,5 @@ class Room(models.Model):
 
     def __str__(self):
         return self.name + " -- " + self.building.name
+    
 

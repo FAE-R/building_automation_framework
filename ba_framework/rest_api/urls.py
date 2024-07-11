@@ -7,8 +7,6 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r'metric', views.MetricViewSet, basename='Metric')
 router.register(r'metadata', views.MetadataViewSet, basename='Metadata')
-router.register(r'userprofile', views.UserProfile, basename='Profile')
-router.register(r'roomprofile', views.RoomProfile, basename='Room')
 router.register(r'building', views.BuildingViewSet, basename='Building')
 router.register(r'taskresult', views.TaskResultViewSet,
                 basename='Taskresult')
