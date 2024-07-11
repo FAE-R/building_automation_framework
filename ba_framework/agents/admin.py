@@ -5,3 +5,4 @@ admin.site.register(Profile)
 admin.site.register(Building)
 admin.site.register(Room)
 
+

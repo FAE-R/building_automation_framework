@@ -20,27 +20,6 @@ class Building(models.Model):
     def __str__(self):
         return self.name + " -- " + self.location
     
-# class Vicki_Thermostat(models.Model):
-#     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-#     serial_number = models.CharField(max_length=100, null=True, blank=True)
-#     device_id_ttn = models.CharField(max_length=100, null=True, blank=True)
-#     ttn_webook_id = models.CharField(max_length=100, null=True, blank=True)
-#     ttn_app_id = models.CharField(max_length=100, null=True, blank=True)
-#     ttn_token = models.CharField(max_length=100, null=True, blank=True)
-#     ttn_m_token = models.CharField(max_length=100, null=True, blank=True)
-#     target_temperature = models.CharField(max_length=100, null=True, blank=True)
-#     operational_mode = models.CharField(max_length=100, null=True, blank=True)
-#     motor_position = models.CharField(max_length=100, null=True, blank=True)
-#     downlink_motor_position = models.CharField(max_length=100, null=True, blank=True)
-#     motor_range = models.CharField(max_length=100, null=True, blank=True)
-#     internal_sensor_temperatur = models.CharField(max_length=100, null=True, blank=True)
-#     battery_voltage = models.CharField(max_length=100, null=True, blank=True)
-
-#     def __str__(self):
-#         return self.room.name + " -- " + self.serial_number
-
-
-
 
 class Profile(models.Model):
     user = models.OneToOneField(
@@ -80,12 +59,7 @@ def save_user_profile(sender, instance, **kwargs):
     except ObjectDoesNotExist:
         Profile.objects.create(user=instance, username=instance.username)
 
-# @receiver(post_save, sender=User)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     try:
-#         instance.profile.save()
-#     except ObjectDoesNotExist:
-#         Profile.objects.create(user=instance, username=instance.username)
+
 
 
 class Room(models.Model):
@@ -111,26 +85,5 @@ class Room(models.Model):
 
     def __str__(self):
         return self.name + " -- " + self.building.name
-
-class Sensor(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    device_name = models.CharField(max_length=100)
-    device_id = models.CharField(max_length=100, unique=True)  # Assuming device ID should be unique
-    table_id = models.CharField(max_length=100)
-    topic = models.CharField(max_length=100)
-    data_point_name = models.CharField(max_length=100)
-    data_point_type = models.CharField(max_length=100)
-    measurement_type = models.CharField(max_length=100)
-    description = models.TextField()  # Use TextField if descriptions can be long
-
-    def __str__(self):
-        return f"{self.device_name} ({self.device_id})"
     
-class Room_Monitoring_Sensors(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
-    value = models.FloatField()
-    timestamp = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.sensor.device_name} ({self.sensor.device_id}) - {self.value} ({self.timestamp})"
