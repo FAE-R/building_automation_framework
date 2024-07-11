@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-from agents.models import Profile, Room, Room_Users, Building
+from agents.models import Profile, Room, Building
 from django_celery_results.models import TaskResult
 from datetime import timedelta
 import pytz
@@ -70,45 +70,6 @@ class UserProfile(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-class RoomProfile(viewsets.ModelViewSet):
-    """
-    API endpoint for handling user profile data
-    """
-    permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [authentication.TokenAuthentication]
-    serializer_class = RoomSerializer
-
-    def get_queryset(self):
-        """
-        Return room data
-        """
-        user_id = Token.objects.get(key=self.request.auth).user_id
-        user = User.objects.get(id=user_id)
-        profile = Profile.objects.get(user=user)
-        room_id = self.request.query_params.get('room')
-        if Room.objects.filter(name=room_id).exists():
-            room_q = Room.objects.get(name=room_id)
-            if Room_Users.objects.filter(user__pk=user_id, room__name=room_q.name).exists():
-                return Room.objects.filter(name=room_q.name)
-
-    @action(detail=True, methods=['put'])
-    def set_control_mode(self, request, pk=None):
-        """
-        Changing room control mode
-        """
-        user_id = Token.objects.get(key=self.request.auth).user_id
-        user = User.objects.get(id=user_id)
-        profile = Profile.objects.get(user=user)
-        room_id = self.request.query_params.get('room')
-        if Room.objects.filter(name=room_id).exists():
-            room_q = Room.objects.get(name=room_id)
-            if Room_Users.objects.filter(user=profile, room=room_q).exists():
-                serializer = RoomSerializer().update(room_q, self.request.data, profile)
-                return Response(status=status.HTTP_200_OK)
-            else:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomAuthToken(ObtainAuthToken):
