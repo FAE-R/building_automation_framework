@@ -56,6 +56,39 @@ services:
       DJANGO_DEBUG: "false"
       EXPO_TOKEN: ${EXPO_TOKEN}
 
+  logger:
+    build:
+      context: ./ba_framework
+      dockerfile: ./Dockerfile_logger
+    restart: "always"
+    container_name: logger
+    stdin_open: true
+    tty: true
+    volumes:
+      - "./ba_framework:/home/ba_framework"
+      - staticfiles:/home/ba_framework/static
+    depends_on:
+      - posgresql
+      - redis
+    links:
+      - posgresql
+      - redis
+    env_file:
+      - .env
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "true"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+      
   celery:
     build: 
         context: ./ba_framework

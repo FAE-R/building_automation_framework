@@ -74,7 +74,7 @@ class Server:
         self.client_2 = clients[1]
         self.client_3 = clients[2]
 
-        self.client_1.client.on_message = self._on_message_v5
+        self.client_1.client.on_message = self._on_message_v3
         self.client_2.client.on_message = self._on_message_v3
         self.client_3.client.on_message = self._on_message_v3
 
@@ -83,13 +83,30 @@ class Server:
         try:
             device_id = json.loads(message.payload.decode(
                 "utf-8", "ignore"))['end_device_ids']['device_id']
+            attr_value = json.loads(message.payload.decode(
+                "utf-8", "ignore"))["uplink_message"]["decoded_payload"]
+            time = json.loads(message.payload.decode(
+                "utf-8", "ignore"))["received_at"].split(".")[0]
 
-            device_name = redis_instance.get(device_id)
+            timestamp = datetime.strptime(
+                time, '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%dT%H:%M:%S')
 
-            sensor_lib = SensorLib(device_name=device_name, message=message)
-            data = sensor_lib.parse()
+            decoded_messages = []
 
-            for key in data["decoded_messages"]:
+            keys = redis_instance.keys(device_id+"_*")
+            
+            for key in keys:
+                dp = json.loads(redis_instance.get(key))
+                if dp["data_point"] in attr_value.keys():
+                    dec_msg = {}
+                    dec_msg["table_id"] = str(dp["table_id"])
+                    dec_msg["timestamp"] = timestamp
+                    dec_msg["value"] = attr_value[dp["data_point"]]
+                    decoded_messages.append(dec_msg)
+                else:
+                    print("Parameter does not exist in payload")
+
+            for key in decoded_messages:
                 table = key["table_id"]
                 if table is not None:
                     msg = {
@@ -104,66 +121,13 @@ class Server:
                         self.channel, self.mqtt_channel_name, self.mqtt_channel_sub, msg)
                 else:
                     print('data logging error for topic {} and this client {}'.format(
-                        message.topic, self.client_2.host))
+                        message.topic, userdata["host"]))
                     logger.error('data logging error for topic {} and this client {}'.format(
-                        message.topic, self.client_2.host))
+                        message.topic, userdata["host"]))
+
 
         except:
             print('Data from TTN not valid ...')
-
-    def _on_message_v5(self, client, userdata, message):
-
-        try:
-            if message.topic == "IG/mbus":
-                sensor_lib = SensorLib(
-                    device_name="PolluTherm", message=message)
-                data = sensor_lib.parse()
-
-                for key in data["decoded_messages"]:
-                    table = key["table_id"]
-                    if table is not None:
-                        msg = {
-                            "topic": message.topic,
-                            "payload": key,
-                            "qos": message.qos,
-                            "host": userdata["host"],
-                            "port": userdata["port"],
-                        }
-
-                        self._asyncio_send(
-                            self.channel, self.mqtt_channel_name, self.mqtt_channel_sub, msg)
-                    else:
-                        print('data logging error for topic {} and this client {} and this message {}'.format(
-                            message.topic, self.client_1.host, key))
-                        logger.error('data logging error for topic {} and this client {} and this message {}'.format(
-                            message.topic, self.client_1.host, key))
-            else:
-                payload = {}
-                table = json.loads(redis_instance.get(
-                    payload["data_point_name"]))["table_id"]
-                if table != None:
-                    payload["timestamp"] = payload["timestamp"]
-                    payload["table_id"] = table
-                    payload["value"] = payload["value"]
-                    msg = {
-                        "topic": message.topic,
-                        "payload": payload,
-                        "qos": message.qos,
-                        "host": userdata["host"],
-                        "port": userdata["port"],
-                    }
-
-                    self._asyncio_send(
-                        self.channel, self.mqtt_channel_name, self.mqtt_channel_sub, msg)
-                else:
-                    print('data logging error for topic {} and this client {}'.format(
-                        message.topic, self.client_1.host))
-                    logger.error('data logging error for topic {} and this client {}'.format(
-                        message.topic, self.client_1.host))
-
-        except:
-            logger.error('Error: data logging error for topic {} and this client {}'.format(
-                message.topic, self.client_1.host))
 
     def _asyncio_send(self, channel, mqtt_channel_name, mqtt_channel_sub, msg):
         try:
@@ -286,8 +250,8 @@ class Server:
         logger.info("Event loop for mqtt clients running forever ...")
 
         asyncio.ensure_future(self.client_1_start())
-        asyncio.ensure_future(self.client_2_start())
-        asyncio.ensure_future(self.client_3_start())
+        # asyncio.ensure_future(self.client_2_start())
+        # asyncio.ensure_future(self.client_3_start())
         try:
             loop.run_forever()
         except KeyboardInterrupt:
