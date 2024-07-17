@@ -96,7 +96,7 @@ class MetricViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         model_name = self.request.query_params.get('datapoint')
-        table_i = apps.get_model('logger', model_name)
+        table_i = apps.get_model('logger', str(model_name))
         request_time_from = self.request.query_params.get('from')
         request_time_to = self.request.query_params.get('to')
 
