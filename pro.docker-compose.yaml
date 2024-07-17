@@ -20,6 +20,8 @@ services:
     restart: "always"
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
       
   django:
     build:
@@ -35,6 +37,7 @@ services:
       - staticfiles:/home/ba_framework/static
       - certs:/home/ba_framework/certs
     depends_on:
+      - logger
       - posgresql
       - redis
     links:
@@ -206,3 +209,4 @@ volumes:
   staticfiles:
   certs:
   grafana_data:
+  redis_data:

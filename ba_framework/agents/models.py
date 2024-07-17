@@ -237,6 +237,6 @@ def create_datapoints(sender, instance, created, **kwargs):
                 value = json.dumps(value)
                 redis_instance.set(key, value)
                 response = {
-                    'msg': f"{key} successfully set to {instance.device_DevEui}"
+                    'msg': f"{key} successfully set to {instance.device_devEui}"
                 }
                 print("Redis: ", response)
