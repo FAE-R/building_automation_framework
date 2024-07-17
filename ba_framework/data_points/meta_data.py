@@ -14,7 +14,7 @@ def MetaData_fill():
 
     ####### save data point name as a dict in redis #####
 
-    for dp in range(DPs):
+    for dp in DPs:
 
 
         value = {
@@ -28,20 +28,18 @@ def MetaData_fill():
             "measurement_type": "float",
             "description": "this is a ..."
         }
-        value = json.dumps(value)
-        
-        key = value["data_point_name"] # add data point name
-        redis_instance.set(key, value)
-        response = {
-            'msg': f"{key} successfully set to {dp.device.device_DevEui}"
-        }
-        print("Redis: ", response)
+
 
         ####### save device id as a dict in redis #####
 
-        key = dp.device_id
 
-        redis_instance.set(key, dp.device_name)
+        key = value["data_point_name"] # add data point name
+        value = json.dumps(value)
+        redis_instance.set(key, value)
+        response = {
+            'msg': f"{key} successfully set to {dp.device.device_devEui}"
+        }
+        print("Redis: ", response)
 
         print(dp.table_id, ": table MetaData filled with a new entry ...")
             

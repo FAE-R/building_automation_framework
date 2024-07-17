@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import permissions, authentication
-from .serializers import MetricSerializer, MetadataSerializer, ProfileSerializer, RoomSerializer, BuildingSerializer, TaskResultSerializer
+from .serializers import MetricSerializer, ProfileSerializer, RoomSerializer, BuildingSerializer, TaskResultSerializer
 from logger.models import *
 from django.apps import apps
 from django.utils import timezone
@@ -119,19 +119,6 @@ class MetricViewSet(viewsets.ModelViewSet):
         data = MetricSerializer
         MetricSerializer.Meta.model = apps.get_model('logger', model_name)
         return data
-
-
-class MetadataViewSet(viewsets.ModelViewSet):
-    serializer_class = MetadataSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [authentication.TokenAuthentication]
-
-    def get_queryset(self):
-        model_name = self.request.query_params.get('datapoint')
-        if model_name != "all":
-            return MetaData.objects.all().filter(table_id=model_name)
-        else:
-            return MetaData.objects.all()
 
 
 class TaskResultViewSet(viewsets.ModelViewSet):
