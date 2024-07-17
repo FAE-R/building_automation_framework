@@ -183,3 +183,5 @@ def Occupancy_Detection(room: object, current_state: int) -> dict:
     else:
         output["error"] = "Room object is none"
         return output
+
+

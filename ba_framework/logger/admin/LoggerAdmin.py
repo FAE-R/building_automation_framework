@@ -12,7 +12,6 @@ from import_export.admin import ImportExportModelAdmin, ImportExportActionModelA
 class MetaDataAdmin(admin.ModelAdmin):
       pass
       
-admin.site.register(MetaData, MetaDataAdmin)
 
 
 # class DPAdmin(admin.ModelAdmin):

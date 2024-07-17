@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.serializers.json import DjangoJSONEncoder
 import uuid
 import json
 import redis
@@ -32,13 +33,11 @@ class Profile(models.Model):
 
 
 class Building(models.Model):
-    name = models.CharField(max_length=30, default="UNKNOWN", null=True,)
+    name = models.CharField(max_length=30, default="UNKNOWN", null=False,)
     building_id = models.CharField(max_length=30, blank=True, null=True,)
-    operator =  models.ForeignKey(
-        Profile, on_delete=models.CASCADE, null=True)
     owner =  models.ForeignKey(
         Profile, on_delete=models.CASCADE, null=True)
-    location = models.CharField(max_length=30, blank=True, null=True,)
+    location = models.CharField(max_length=30, blank=False, null=False,)
     address = models.CharField(max_length=30, blank=True, null=True,)
     city = models.CharField(max_length=30, blank=True, null=True,)
     country = models.CharField(max_length=30, blank=True, null=True,)
@@ -112,10 +111,10 @@ class Device(models.Model):
     room = models.ForeignKey(
         to=Room, on_delete=models.CASCADE, null=True, blank=True)
     device_id = models.CharField(max_length=30, blank=False, null=False)
-    device_appEui = models.CharField(max_length=30, blank=True, null=True)
-    device_devEui = models.CharField(max_length=30, blank=True, null=True)
+    device_appEui = models.CharField(max_length=30, blank=False, null=False)
+    device_devEui = models.CharField(max_length=30, blank=False, null=False)
     device_name = models.CharField(max_length=30, blank=True, null=True)
-    app_id = models.CharField(max_length=30, blank=True, null=True)
+    app_id = models.CharField(max_length=30, blank=False, null=False)
     type = models.CharField(max_length=30, choices=SENSOR_CHOICES, blank=False, null=False,
                             help_text="device type (e.g. sensor, actuator, switch,…)")
     status = models.CharField(max_length=30, blank=True, null=True,
@@ -131,12 +130,13 @@ class Device(models.Model):
         return str(self.device_id)
 
 class Datapoint(models.Model):
-    datapoint_name = models.CharField(max_length=30, blank=False, null=False)
-    table_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    device_eui = models.CharField(max_length=30, blank=False, null=False)
+    datapoint_name = models.CharField(max_length=100, blank=False, null=False)
+    #table_id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4, unique=True)
+    table_id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4, editable=False, unique=True)
+    device_eui = models.CharField(max_length=100, blank=False, null=False)
     device = models.ForeignKey(
         to=Device, on_delete=models.CASCADE, null=False)
-    type = models.CharField(max_length=30, default="float")
+    type = models.CharField(max_length=100, default="float")
     status = models.CharField(max_length=30, blank=True, null=True,
                               help_text="datapoint status (e.g. online, offline, idle)")
     measurement_type = models.CharField(max_length=30, blank=True, null=True)
@@ -146,9 +146,15 @@ class Datapoint(models.Model):
 
 
     def __str__(self):
-        return str(self.device.type) + " -- " + str(self.datapoint_name)
+        return f"{self.device.type} -- {self.datapoint_name}"
 
 
+class UUIDEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, uuid.UUID):
+            # if the obj is uuid, we simply return the value of uuid
+            return obj.hex
+        return json.JSONEncoder.default(self, obj)
 
 @receiver(post_save, sender=Device)
 def create_datapoints(sender, instance, created, **kwargs):
@@ -171,6 +177,7 @@ def create_datapoints(sender, instance, created, **kwargs):
                 for dp in data_point_list:
                     dp_obj = Datapoint.objects.create(
                         datapoint_name=instance.device_devEui + '_' + dp, 
+                        table_id=str(uuid.uuid4().hex),
                         device=instance, 
                         device_eui=instance.device_devEui, 
                         type=dp
@@ -179,6 +186,7 @@ def create_datapoints(sender, instance, created, **kwargs):
                     value = {
                         "data_point_name": instance.device_devEui + '_' + dp,
                         "device_name": instance.device_name,
+                        "data_point": dp,
                         "device_id": instance.device_devEui,
                         "table_id": dp_obj.table_id,
                         "topic": "v3/"+instance.app_id+"@ttn/devices/#",  
@@ -187,12 +195,13 @@ def create_datapoints(sender, instance, created, **kwargs):
                         "description": "this is a ..."
                     }
 
-                    value = json.dumps(value)
+                    
                     
                     key = value["data_point_name"] # add data point name
+                    value = json.dumps(value)
                     redis_instance.set(key, value)
                     response = {
-                        'msg': f"{key} successfully set to {instance.device_DevEui}"
+                        'msg': f"{key} successfully set to {instance.device_devEui}"
                     }
                     print("Redis: ", response)
 
@@ -224,9 +233,8 @@ def create_datapoints(sender, instance, created, **kwargs):
                     "description": "this is a ..."
                 }
 
+                key = value["data_point_name"]
                 value = json.dumps(value)
-                
-                key = value["data_point_name"] # add data point name
                 redis_instance.set(key, value)
                 response = {
                     'msg': f"{key} successfully set to {instance.device_DevEui}"

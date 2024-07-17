@@ -21,3 +21,4 @@ echo "done"
 echo "Collectstatics ... "
 python manage.py collectstatic --noinput
 echo "done"
+uvicorn ba_framework.asgi:application --host 0.0.0.0 --port 80 --reload

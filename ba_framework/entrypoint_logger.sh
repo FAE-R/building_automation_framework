@@ -21,12 +21,12 @@ echo "Collectstatics ... "
 python manage.py collectstatic --noinput
 echo "done"
 echo "Run workers ... "
-python manage.py runworker mqtt &
+python manage.py runscript data_points.data_points --continue-on-error &
+python manage.py runworker mqtt 
 echo "done"
 echo "Run workers ... "
-python manage.py runworker dwd_worker &
 echo "done"
 echo "Run data point server ... "
-python manage.py runscript data_points.data_points --continue-on-error &
+
 echo "done"
 exec "$@"
