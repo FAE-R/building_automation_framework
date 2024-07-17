@@ -75,13 +75,6 @@ class MetricSerializer(serializers.ModelSerializer):
         fields = ['value', 'time']
 
 
-class MetadataSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = MetaData
-        fields = ["table_id", "topic", "data_point_name",
-                  "data_point_type", "measurement_type", "description"]
-
 class TaskResultSerializer(serializers.ModelSerializer):
 
     class Meta:

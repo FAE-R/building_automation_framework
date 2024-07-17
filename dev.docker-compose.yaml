@@ -21,11 +21,27 @@ services:
     ports:
       - "6379:6379"
 
+  mqtt_agent:
+    build: ./mqtt_client
+    command: python mqtt_client.py
+    container_name: mqtt_agent
+    restart: "always"
+    stdin_open: true
+    tty: true
+    volumes:
+      - './mqtt_client:/home/mqtt_client'
+    depends_on:
+      - django
+      - redis
+    links:
+      - django
+      - redis
+
   django:
     build:
       context: ./ba_framework
       dockerfile: ./Dockerfile
-    command: uvicorn ba_framework.asgi:application --host 0.0.0.0 --port 80 --reload
+    #command: python manage.py runserver #uvicorn ba_framework.asgi:application --host 0.0.0.0 --port 80 --reload
     restart: "always"
     container_name: django
     stdin_open: true

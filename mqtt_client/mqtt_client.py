@@ -22,15 +22,16 @@ async def mqtt_send(future, channel_layer, channel, event):
 
 client_1 = {
     "client_name": "client_1",
-    "username": "<username>",
-    "password": "<password>",
+    "username": "ebc-ig@ttn",
+    "password": "NNSXS.XOJVM22CG4CHA6ZRNY3BPTRFWNO5WJC2JSCBU6A.TXLCEDKYF27MKBJMZPJEKXQ3WAKPET6TU7HBKDAKWCCGSXP2NEKQ",
     "host": "eu1.cloud.thethings.network",
     "port": 1883,
     "topics_subscription": [
-        "v3/<appID>@ttn/devices/#"
+        "v3/ebc-ig@ttn/devices/#"
     ],
     "mqtt_version": 3
 }
+
 
 
 client_2 = {
@@ -93,7 +94,7 @@ class Server:
 
             decoded_messages = []
 
-            keys = redis_instance.keys(device_id+"_*")
+            keys = redis_instance.keys(device_id+"*")
             
             for key in keys:
                 dp = json.loads(redis_instance.get(key))
@@ -105,7 +106,7 @@ class Server:
                     decoded_messages.append(dec_msg)
                 else:
                     print("Parameter does not exist in payload")
-
+            print("new sensor data: ", decoded_messages)
             for key in decoded_messages:
                 table = key["table_id"]
                 if table is not None:
