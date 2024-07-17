@@ -1,4 +1,4 @@
-from .models import Room
+from .models import Room, Building, Device, Datapoint
 from django.dispatch import receiver
 from celery import shared_task
 from ba_framework.celery import app
@@ -10,7 +10,7 @@ from celery import shared_task
 from django_celery_results.models import TaskResult
 
 
-from .functions.occupancy_detection_task import Occupancy_Detection
+#from .functions.occupancy_detection_task import Occupancy_Detection
 
 logger = get_task_logger(__name__)
 
@@ -18,7 +18,7 @@ logger = get_task_logger(__name__)
 @shared_task(bind=True, name="update_occupancy")
 def update_occupancy(self, room_name, *args, **kwargs):
 
-    room = Room.objects.get(name=room_name)
+    room = Room.objects.get(name=room_name, building=Building.objects.get(name="IG"))
 
     if room is not None:
         current_state = 0
@@ -33,7 +33,7 @@ def update_occupancy(self, room_name, *args, **kwargs):
         else:
             current_state = 0 
 
-        result = Occupancy_Detection(room=room, current_state=current_state)
+        result = None #Occupancy_Detection(room=room, current_state=current_state)
         if result is not None:
             return result
 
