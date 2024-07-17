@@ -4,11 +4,6 @@
 
 # Building Automation Framework
 
-[![License][license-image-M]][license-M]
-[![License][license-image-A]][license-A]
-
---- German version below ---
-
 <a href="https://www.fubic.energy" alt="Project logo" title="FUBIC All Electricity - Realization" height="170"/> </a>
 
 ## Overview
