@@ -12,11 +12,11 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
 
-# Schedule the task to run every 1 minutes
+# Periodic tasks
 app.conf.beat_schedule = {
     'fetch-data-every-1-minutes': {
         'task': 'agents.tasks.fetch_data_task',
-        'schedule': crontab(minute='*/1'),  # Runs every 1 minutes
-        'args': (1,),  # Replace with appropriate room_id
+        'schedule': crontab(minute='*/1'),  
+        'args': (1,),  
     },
 }
