@@ -5,62 +5,7 @@ from django.utils import timezone
 from datetime import timedelta, datetime, date
 import holidays
 
-
-def fetch_data(room: Room) -> dict: 
-    """
-    Fetch data from the database for the given room
-    
-    input parameters:
-        - room: django room object
-
-    output:
-        - dict
-        {
-            "co2": [],
-            "motion": [],
-            "ir": [],
-            "doors_status": []
-        }
-    """
-
-    sensor_data_points = {
-        'elsys-ers-co2': ['co2', 'motion'],
-        'tab-elsys-ers': ['digital'],
-        'elsys-ers-eye': ['occupancy'],
-    }
-
-    # Initialize the data dictionary
-    data = {
-        'co2': None,
-        'door': None,
-        'motion': None
-    }
-
-    if room != None:
-        # Fetch all devices associated with the given room
-        devices = Device.objects.filter(room=room)
-
-        # Fetch all data points associated with the devices
-        for device in devices:
-            for sensor_type, data_point_names in sensor_data_points.items():
-                if device.type == sensor_type:
-                    for dp_name in data_point_names:
-                        data_points = Datapoint.objects.filter(
-                            device=device,
-                            datapoint_name__contains=dp_name,
-                            pub_date__gte=timezone.now() - timedelta(days=30)
-                        ).order_by('-pub_date')[:6]  # Fetch the latest 6 data points
-
-                        if data_points.count() < 6:
-                            sufficient_data = False
-                            data[dp_name] = f"Not enough datapoints for {dp_name} (found {data_points.count()})"
-                        else:
-                            data[dp_name] = list(data_points)
-
-    if not sufficient_data:
-        data['error'] = "Not enough datapoints available for one or more sensor types."
-
-    return data
+                            
 
 
 
