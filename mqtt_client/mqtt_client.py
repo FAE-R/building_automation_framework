@@ -27,9 +27,7 @@ client_1 = {
     "host": "eu1.cloud.thethings.network",
     "port": 1883,
     "topics_subscription": [
-        "v3/<appID>@ttn/devices/eui-a81758fffe0b8186/#",
-        "v3/<appID>@ttn/devices/eui-a81758fffe08594d/#",
-        "v3/<appID>@ttn/devices/eui-a81758fffe097e61/#"
+        "v3/ebc-ig@ttn/devices/#"
     ],
     "mqtt_version": 3
 }
