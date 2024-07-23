@@ -12,11 +12,3 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
 
-# Periodic tasks
-app.conf.beat_schedule = {
-    'fetch-data-every-1-minutes': {
-        'task': 'agents.tasks.fetch_data_task',
-        'schedule': crontab(minute='*/1'),  
-        'args': (1,),  
-    },
-}

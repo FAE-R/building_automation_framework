@@ -7,7 +7,8 @@ import holidays
 
                             
 
-
+def Occupancy_Detection(room: object, current_state: int) -> dict:
+    pass
 
 
 

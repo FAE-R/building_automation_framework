@@ -240,3 +240,9 @@ def create_datapoints(sender, instance, created, **kwargs):
                     'msg': f"{key} successfully set to {instance.device_devEui}"
                 }
                 print("Redis: ", response)
+
+                dp.datapoint_name = instance.device_devEui + '_' + dp.type
+                dp.device_eui = instance.device_devEui
+                dp.device = instance
+                dp.type = dp.type
+                dp.save()
