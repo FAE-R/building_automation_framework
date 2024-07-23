@@ -17,7 +17,7 @@ Core features include:
 - **User Authentication and Authorization**: Ensures secure access with comprehensive user management.
 - **Scalability and Reliability**: Designed to handle large volumes of data and high user traffic.
 - **Automated Deployment**: Simplifies deployment with Docker and Docker Compose.
-<a> <img alt="Architecture" src="logos/Picture1.png" height="500"> </a>
+<a> <img alt="Architecture" src="logos/Picture1.png" height="400"> </a>
 ## Getting Started
 
 ### Requirements
