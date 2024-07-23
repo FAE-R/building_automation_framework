@@ -75,6 +75,11 @@ Responsible for handling various tasks within the framework, including:
 - **Energy Efficiency Tasks**: Monitoring and optimizing energy usage.
 - **KPI Analysis**: Analyzing key performance indicators to improve system performance and user comfort.
 
+The agents folder within the system handles automated tasks using Celery, an asynchronous task queue based on distributed message passing. The system schedules and executes these tasks, such as occupancy detection in rooms, using Celery Beat, a scheduler that triggers periodic tasks that are then executed by Celery workers.
+
+### Context broker
+The Context Broker utilizes the Django ORM (Object-Relational Mapping). Django ORM is a powerful tool for data management, allowing developers to interact with database data in a high-level, object-oriented manner. It abstracts SQL queries into Python code, making database operations more intuitive and maintaining code more maintainable.
+
 #### ba_framework 
 Contains the core configuration files for the Django project, such as settings, URLs, ASGI and WSGI configurations, and Celery setup for asynchronous task handling.
 
