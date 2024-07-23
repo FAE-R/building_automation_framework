@@ -1,4 +1,4 @@
-from .models import Room, Building, Device, Datapoint
+from .models import *
 from django.dispatch import receiver
 from celery import shared_task
 from ba_framework.celery import app
@@ -8,11 +8,19 @@ from django_celery_beat.models import PeriodicTask, PeriodicTasks, CrontabSchedu
 from django.apps import apps
 from celery import shared_task
 from django_celery_results.models import TaskResult
+from .data_fetcher import fetch_data  
 
 
 #from .functions.occupancy_detection_task import Occupancy_Detection
 
 logger = get_task_logger(__name__)
+
+
+@shared_task
+def fetch_data_task(room_id):
+    room = Room.objects.get(id=room_id)
+    data = fetch_data(room)
+    print(data)  
 
 
 @shared_task(bind=True, name="update_occupancy")

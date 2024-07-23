@@ -1,6 +1,7 @@
 import redis
 from agents.models import Datapoint
 import json
+from django.core.management import call_command
 
 
 def MetaData_fill():
@@ -42,6 +43,10 @@ def MetaData_fill():
         print("Redis: ", response)
 
         print(dp.table_id, ": table MetaData filled with a new entry ...")
+
+
+    call_command('makemigrations', 'logger', interactive=False)
+    call_command('migrate', interactive=False)
             
 
     print("Meta data tables ready ...")

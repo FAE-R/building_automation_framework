@@ -33,7 +33,7 @@ class MqttConsumer(AsyncConsumer):
         table = payload["table_id"]
         try:
             # Dynamically getting the model using the table ID.
-            Metric = apps.get_model('logger', table)
+            Metric = apps.get_model('logger', str(table))
             metric = Metric()
             
             # Setting the value of the metric from the payload.

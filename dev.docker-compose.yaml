@@ -20,6 +20,8 @@ services:
     restart: "always"
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   mqtt_agent:
     build: ./mqtt_client
@@ -40,7 +42,7 @@ services:
   django:
     build:
       context: ./ba_framework
-      dockerfile: ./Dockerfile
+      dockerfile: ./dev.Dockerfile
     #command: python manage.py runserver #uvicorn ba_framework.asgi:application --host 0.0.0.0 --port 80 --reload
     restart: "always"
     container_name: django
@@ -50,6 +52,7 @@ services:
       - "./ba_framework:/home/ba_framework"
       - staticfiles:/home/ba_framework/static
     depends_on:
+      - logger
       - posgresql
       - redis
     links:
@@ -105,7 +108,57 @@ services:
       DJANGO_DEBUG: "true"
       EXPO_TOKEN: ${EXPO_TOKEN}
 
+  celery:
+    build: 
+        context: ./ba_framework
+        dockerfile: ./Dockerfile_Celery
+    command: celery -A ba_framework worker -l info
+    container_name: celery1
+    restart: "always"
+    volumes:
+      - './ba_framework:/home/ba_framework'
+      - staticfiles:/home/ba_framework/static
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "false"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+    depends_on:
+      - redis
 
+  celery-beat:
+    build:
+        context: ./ba_framework
+        dockerfile: ./Dockerfile_Celery
+    command: celery -A ba_framework beat -l info
+    container_name: celery_beat
+    restart: "always"
+    volumes:
+      - './ba_framework:/home/ba_framework'
+      - staticfiles:/home/ba_framework/static
+    environment:
+      WAIT_HOSTS: posgresql:${Postgres_PORT}
+      Postgres_DATABASE: ${Postgres_DB}
+      Postgres_USER: ${Postgres_USER}
+      Postgres_PASSWORD: ${Postgres_USER_PW}
+      Postgres_HOST: ${Postgres_HOST}
+      Postgres_PORT: ${Postgres_PORT}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: "false"
+      EXPO_TOKEN: ${EXPO_TOKEN}
+    depends_on:
+      - redis
 
   nginx: 
     build:
@@ -126,3 +179,4 @@ services:
 volumes:
   postgres_data:
   staticfiles:
+  redis_data:
