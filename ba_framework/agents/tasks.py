@@ -8,7 +8,8 @@ from django_celery_beat.models import PeriodicTask, PeriodicTasks, CrontabSchedu
 from django.apps import apps
 from celery import shared_task
 from django_celery_results.models import TaskResult
-from .data_fetcher import fetch_data 
+from .occupancy_detection import v1
+import pandas as pd
 
 
 #from .functions.occupancy_detection_task import Occupancy_Detection
@@ -16,34 +17,29 @@ from .data_fetcher import fetch_data
 logger = get_task_logger(__name__)
 
 
-@shared_task(bind=True, name="fetch_data_task")
-def fetch_data_task(self, room_name, *args, **kwargs):
-    room = Room.objects.get(name=room_name)
-    data = fetch_data(room)
-    print(data)
-
-
 @shared_task(bind=True, name="update_occupancy")
 def update_occupancy(self, room_name, *args, **kwargs):
 
-    room = Room.objects.get(name=room_name, building=Building.objects.get(name="IG"))
-
+    room = Room.objects.get(name=room_name)
     if room is not None:
-        current_state = 0
+        # last_task_result = TaskResult.objects.filter(periodic_task_name=TaskResult.objects.get(task_id=self.request.id).periodic_task_name).last()
 
-        last_task_result = TaskResult.objects.filter(periodic_task_name=TaskResult.objects.get(task_id=self.request.id).periodic_task_name).last()
+        # if last_task_result is not None:
+        #     if last_task_result.status == "SUCCESS":
+        #         current_state = int(last_task_result.result)
+        #     else:
+        #         current_state = 0
+        # else:
+        #     current_state = 0 
 
-        if last_task_result is not None:
-            if last_task_result.status == "SUCCESS":
-                current_state = int(last_task_result.result)
-            else:
-                current_state = 0
-        else:
-            current_state = 0 
-
-        result = None #Occupancy_Detection(room=room, current_state=current_state)
+        result = v1(room=room)
         if result is not None:
             return result
 
     else:
         return "Room object is None"
+ 
+    
+
+
+
