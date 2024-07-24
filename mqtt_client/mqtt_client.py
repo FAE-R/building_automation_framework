@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
 import asyncio
 import json
@@ -9,64 +11,32 @@ import xmltodict
 from mqtt_client_logger import logger_conf
 from sensor_lib import SensorLib
 
+load_dotenv()  
+
 redis_instance = redis.StrictRedis(
     host="redis", port=6379, db=0, charset="utf-8", decode_responses=True)
 
 logger = logger_conf(__name__)
 
-
 async def mqtt_send(future, channel_layer, channel, event):
     result = await channel_layer.send(channel, event)
     future.set_result(result)
 
-
 client_1 = {
     "client_name": "client_1",
-    "username": "ebc-ig@ttn",
-    "password": "NNSXS.XOJVM22CG4CHA6ZRNY3BPTRFWNO5WJC2JSCBU6A.TXLCEDKYF27MKBJMZPJEKXQ3WAKPET6TU7HBKDAKWCCGSXP2NEKQ",
-    "host": "eu1.cloud.thethings.network",
-    "port": 1883,
+    "username": os.getenv('CLIENT_1_USERNAME'),
+    "password": os.getenv('CLIENT_1_PASSWORD'),
+    "host": os.getenv('CLIENT_HOST'),
+    "port": int(os.getenv('CLIENT_PORT')),
     "topics_subscription": [
-        "v3/<appID>@ttn/devices/eui-a81758fffe0b8186/#",
-        "v3/<appID>@ttn/devices/eui-a81758fffe08594d/#",
-        "v3/<appID>@ttn/devices/eui-a81758fffe097e61/#"
+        os.getenv('CLIENT_1_TOPICS')
     ],
     "mqtt_version": 3
 }
-
-
-
-client_2 = {
-    "client_name": "client_2",
-    "username": "<username>",
-    "password": "<password>",
-    "host": "eu1.cloud.thethings.network",
-    "port": 1883,
-    "topics_subscription": [
-        "v3/<appID>@ttn/devices/#"
-    ],
-    "mqtt_version": 3
-}
-
-client_3 = {
-    "client_name": "client_3",
-    "username": "<username>",
-    "password": "<password>",
-    "host": "eu1.cloud.thethings.network",
-    "port": 1883,
-    "topics_subscription": [
-        "v3/<appID>@ttn/devices/#"
-    ],
-    "mqtt_version": 3
-}
-
 
 clients = [
-    MQTTv3(client_1),
-    MQTTv3(client_2),
-    MQTTv3(client_3)
+    MQTTv3(client_1)
 ]
-
 
 class Server:
     def __init__(self, channel, clients):
@@ -74,15 +44,10 @@ class Server:
         self.mqtt_channel_name = "mqtt"
         self.mqtt_channel_sub = "mqtt_sub"
         self.client_1 = clients[0]
-        self.client_2 = clients[1]
-        self.client_3 = clients[2]
 
         self.client_1.client.on_message = self._on_message_v3
-        self.client_2.client.on_message = self._on_message_v3
-        self.client_3.client.on_message = self._on_message_v3
 
     def _on_message_v3(self, client, userdata, message):
-
         try:
             device_id = json.loads(message.payload.decode(
                 "utf-8", "ignore"))['end_device_ids']['device_id']
@@ -97,7 +62,7 @@ class Server:
             decoded_messages = []
 
             keys = redis_instance.keys(device_id+"*")
-            
+
             for key in keys:
                 dp = json.loads(redis_instance.get(key))
                 if dp["data_point"] in attr_value.keys():
@@ -127,7 +92,6 @@ class Server:
                         message.topic, userdata["host"]))
                     logger.error('data logging error for topic {} and this client {}'.format(
                         message.topic, userdata["host"]))
-
 
         except:
             print('Data from TTN not valid ...')
@@ -179,72 +143,6 @@ class Server:
                     logger.error("reconnection for {} failed".format(
                         self.client_1.host))
 
-    async def client_2_start(self):
-        self.client_2.client.connect(host=self.client_2.host,
-                                     port=self.client_2.port,
-                                     keepalive=60,
-                                     bind_address="",
-                                     bind_port=0,
-                                     clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
-                                     properties=None)
-
-        await asyncio.sleep(5)
-        while True:
-            self.client_2.client.loop(0.1)
-            await asyncio.sleep(0.01)
-            if not self.client_2.client.connected_flag:
-                self.client_2.client.disconnect()
-                await asyncio.sleep(5)
-                print("client reconnecting ...")
-                logger.error("client reconnecting for {} ... ".format(
-                    self.client_2.host))
-                try:
-                    self.client_2.client.connect(host=self.client_2.host,
-                                                 port=self.client_2.port,
-                                                 keepalive=60,
-                                                 bind_address="",
-                                                 bind_port=0,
-                                                 clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
-                                                 properties=None)
-                    await asyncio.sleep(5)
-                except:
-                    print("reconnection failed")
-                    logger.error("reconnection for {} failed".format(
-                        self.client_2.host))
-
-    async def client_3_start(self):
-        self.client_3.client.connect(host=self.client_3.host,
-                                     port=self.client_3.port,
-                                     keepalive=60,
-                                     bind_address="",
-                                     bind_port=0,
-                                     clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
-                                     properties=None)
-
-        await asyncio.sleep(5)
-        while True:
-            self.client_3.client.loop(0.1)
-            await asyncio.sleep(0.01)
-            if not self.client_3.client.connected_flag:
-                self.client_3.client.disconnect()
-                await asyncio.sleep(5)
-                print("client reconnecting ...")
-                logger.error("client reconnecting for {} ... ".format(
-                    self.client_3.host))
-                try:
-                    self.client_3.client.connect(host=self.client_3.host,
-                                                 port=self.client_3.port,
-                                                 keepalive=60,
-                                                 bind_address="",
-                                                 bind_port=0,
-                                                 clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
-                                                 properties=None)
-                    await asyncio.sleep(5)
-                except:
-                    print("reconnection failed")
-                    logger.error("reconnection for {} failed".format(
-                        self.client_3.host))
-
     def run(self):
         loop = asyncio.get_event_loop()
         self.loop = loop
@@ -253,8 +151,6 @@ class Server:
         logger.info("Event loop for mqtt clients running forever ...")
 
         asyncio.ensure_future(self.client_1_start())
-        # asyncio.ensure_future(self.client_2_start())
-        # asyncio.ensure_future(self.client_3_start())
         try:
             loop.run_forever()
         except KeyboardInterrupt:
@@ -266,9 +162,6 @@ class Server:
             loop.close()
 
         self.client_1.disconnect()
-        self.client_2.disconnect()
-        self.client_3.disconnect()
-
 
 channel_layer = get_channel_layer()
 client_server = Server(channel_layer, clients)
