@@ -118,6 +118,8 @@ services:
     volumes:
       - './ba_framework:/home/ba_framework'
       - staticfiles:/home/ba_framework/static
+    env_file:
+      - .env
     environment:
       WAIT_HOSTS: posgresql:${Postgres_PORT}
       Postgres_DATABASE: ${Postgres_DB}
@@ -129,7 +131,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DJANGO_DEBUG: "false"
+      DJANGO_DEBUG: "true"
       EXPO_TOKEN: ${EXPO_TOKEN}
     depends_on:
       - redis
@@ -144,6 +146,8 @@ services:
     volumes:
       - './ba_framework:/home/ba_framework'
       - staticfiles:/home/ba_framework/static
+    env_file:
+      - .env 
     environment:
       WAIT_HOSTS: posgresql:${Postgres_PORT}
       Postgres_DATABASE: ${Postgres_DB}
@@ -155,7 +159,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DJANGO_DEBUG: "false"
+      DJANGO_DEBUG: "true"
       EXPO_TOKEN: ${EXPO_TOKEN}
     depends_on:
       - redis
@@ -175,6 +179,18 @@ services:
       - django
     links:
       - django
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: "always"
+    depends_on:
+      - posgresql
+    ports:
+      - "8000:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
 
 volumes:
   postgres_data:
