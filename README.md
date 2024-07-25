@@ -18,6 +18,7 @@ Core features include:
 - **Scalability and Reliability**: Designed to handle large volumes of data and high user traffic.
 - **Automated Deployment**: Simplifies deployment with Docker and Docker Compose.
 <a> <img alt="Architecture" src="logos/Picture1.png" height="320"> </a>
+
 ## Getting Started
 
 ### Requirements
@@ -45,23 +46,63 @@ Core features include:
     ADMIN_EMAIL=your_admin_email
     DJANGO_SECRET_KEY=your_django_secret_key
     DJANGO_DEBUG=true
-    EXPO_TOKEN=your_expo_token
     ```
 
 3. **Build and Run the Containers**
+    For development environments, use:
     ```sh
     docker-compose -f dev.docker-compose.yaml up --build
     ```
+    For production deployment, use:
+    ```sh
+    docker-compose -f prod.docker-compose.yaml up --build
+    ```
+
+### Initial Configuration and Setup
+
+After successfully launching the containers, follow these steps to configure the platform:
+
+1. **Access the Admin Panel**
+   - Navigate to `http(s)://<your-server-ip>:<django port>/admin` to access the Django admin panel using the credentials defined in the `.env` file.
+
+2. **Add Building and Room**
+   - Utilize the admin panel to define new buildings and rooms, setting necessary details such as location, room numbers, and capacity.
+
+3. **Automated Sensor and Data Point Setup**
+   - Sensors and corresponding data points for environmental monitoring will be automatically set up when a room is added.
+
+4. **Configure Occupancy Detection**
+   - Define occupancy detection tasks to analyze room usage and optimize building efficiency.
+
+### Production Visualization Tools
+
+When using the `prod.docker-compose.yaml` for deploying in a production environment, the following visualization tools are available:
+
+- **Grafana for Visualization**
+   - Access Grafana at `http(s)://<your-server-ip>:<django port>/grafana/`. Use the username and password defined in your `.env` file for login. This platform provides advanced data visualization capabilities.
+
+- **pgAdmin for Database Management**
+   - Manage your PostgreSQL database with pgAdmin at `http(s)://<your-server-ip>:<django port>/pgadmin/`. Login with the credentials set in your `.env` file. This tool offers comprehensive database management functionalities.
 
 ### Stopping the Containers
-    ```sh
-    docker-compose -f dev.docker-compose.yaml down
-    ```
+For development:
+```sh
+docker-compose -f dev.docker-compose.yaml down
+```
+For production:
+```sh
+docker-compose -f prod.docker-compose.yaml down
+```
 
 ### Rebuilding the Containers
-    ```sh
-    docker-compose -f dev.docker-compose.yaml up --build
-    ```
+For development:
+```sh
+docker-compose -f dev.docker-compose.yaml up --build
+```
+For production:
+```sh
+docker-compose -f prod.docker-compose.yaml up --build
+```
 
 ## Documentation
 
