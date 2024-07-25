@@ -57,7 +57,6 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: "false"
-      EXPO_TOKEN: ${EXPO_TOKEN}
 
   logger:
     build:
@@ -90,7 +89,6 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: "true"
-      EXPO_TOKEN: ${EXPO_TOKEN}
       
   celery:
     build: 
@@ -114,7 +112,6 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: "false"
-      EXPO_TOKEN: ${EXPO_TOKEN}
     depends_on:
       - redis
 
@@ -140,7 +137,6 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: "false"
-      EXPO_TOKEN: ${EXPO_TOKEN}
     depends_on:
       - redis
 
