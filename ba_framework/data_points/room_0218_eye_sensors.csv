@@ -1,7 +1,0 @@
-device_name;device_id;table_id;topic;data_point_name;data_point_type;measurement_type;description
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_occupancy;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_occupancy;float;digit;ELS-ERS2EYE-0219
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_humidity;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_humidity;float;%;ELS-ERS2EYE-0219
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_light;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_light;float;lux;ELS-ERS2EYE-0219
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_motion;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_motion;float;count;ELS-ERS2EYE-0219
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_temperature;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_temperature;float;C;ELS-ERS2EYE-0219
-elsys-ers-eye;eui-a81758fffe0b8186;elsysEYE_219_vdd;v3/ebc-ig@ttn/devices/eui-a81758fffe0b8186/up;eui-a81758fffe0b8186_vdd;float;v;ELS-ERS2EYE-0219
