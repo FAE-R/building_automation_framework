@@ -34,18 +34,39 @@ Core features include:
     ```
 
 2. **Create a .env File**
-    Create a `.env` file in the root directory with the following content:
+    Create a .env File Create a .env file in the root directory with the following entries to configure your environment. Replace the placeholders with your actual settings:
     ```sh
-    Postgres_DB=your_database_name
-    Postgres_USER=your_postgres_user
-    Postgres_USER_PW=your_postgres_password
-    Postgres_HOST=postgres
-    Postgres_PORT=5432
-    ADMIN_USERNAME=your_admin_username
-    ADMIN_PASSWORD=your_admin_password
-    ADMIN_EMAIL=your_admin_email
-    DJANGO_SECRET_KEY=your_django_secret_key
-    DJANGO_DEBUG=true
+    # PostgreSQL Configuration
+    Postgres_ROOT_PW=<ROOT_PASSWORD>
+    Postgres_USER=<USER>
+    Postgres_USER_PW=<USER_PASSWORD>
+    Postgres_HOST=<HOSTNAME>
+    Postgres_DB=<DATABASE_NAME>
+    Postgres_PORT=<PORT>
+    
+    # PgAdmin Configuration
+    PGADMIN_DEFAULT_EMAIL=<DEFAULT_EMAIL>
+    PGADMIN_DEFAULT_PASSWORD=<DEFAULT_PASSWORD>
+    
+    # Django Configuration
+    DJANGO_SECRET_KEY=<SECRET_KEY>
+    PRO_DJANGO_DEBUG=<DEBUG_TRUE_OR_FALSE>
+    
+    # MQTT Agent
+    CLIENT_1_USERNAME=<USERNAME>
+    CLIENT_1_PASSWORD=<PASSWORD>
+    CLIENT_HOST=<HOST>
+    CLIENT_PORT=<PORT>
+    CLIENT_1_TOPICS=<TOPICS>
+    
+    # Admin User Configuration
+    ADMIN_USERNAME=<USERNAME>
+    ADMIN_PASSWORD=<PASSWORD>
+    ADMIN_EMAIL=<EMAIL>
+    
+    # Grafana Configuration
+    GRAFANA_USERNAME=<USERNAME>
+    GRAFANA_PASSWORD=<PASSWORD>
     ```
 
 3. **Build and Run the Containers**

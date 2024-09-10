@@ -1,7 +1,0 @@
-device_name;device_id;table_id;topic;data_point_name;data_point_type;measurement_type;description
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_co2;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_co2;float;ppm;ELS-ERSCO2-0219
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_humidity;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_humidity;float;%;ELS-ERSCO2-0219
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_light;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_light;float;lux;ELS-ERSCO2-0219
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_motion;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_motion;float;None;ELS-ERSCO2-0219
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_temperature;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_temperature;float;C;ELS-ERSCO2-0219
-elsys-ers-co2-lite;eui-a81758fffe08594d;elsysCO2_219_vdd;v3/ebc-ig@ttn/devices/eui-a81758fffe08594d/up;eui-a81758fffe08594d_vdd;float;None;ELS-ERSCO2-0219
